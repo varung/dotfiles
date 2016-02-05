@@ -138,15 +138,11 @@ Plugin 'YankRing.vim'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
-set backupdir=$HOME/.backup
-set backup
-set writebackup
-set directory=$HOME/.backup
+set nobackup
+set nowritebackup
 
-nmap <C-b> :!ssh root@192.168.99.100 "cd /root/fuse-2.9.2/repfs; make;"<CR>
 colorscheme elflord
 
-execute pathogen#infect()
 syntax on
 filetype plugin indent on
 colorscheme zellner
