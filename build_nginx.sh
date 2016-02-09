@@ -20,20 +20,11 @@ make
 sudo make install
 
 apt-get install libssl-dev
-
+cd /root
 wget http://nginx.org/download/nginx-1.9.11.tar.gz
 tar -xzvf nginx-1.9.11.tar.gz 
 cd nginx-1.9.11
 
-./configure \
-  --sbin-path=/usr/local/nginx/nginx \
-  --conf-path=/usr/local/nginx/nginx.conf \
-  --pid-path=/usr/local/nginx/nginx.pid \
-  --with-pcre=../pcre-8.37 \
-  --with-zlib=../zlib-1.2.8 \
-  --with-http_ssl_module \
-  --with-stream_ssl_module \
-  --with-stream \
-  --with-mail
+./configure --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-pcre=../pcre-8.37 --with-zlib=../zlib-1.2.8  --with-http_ssl_module  --with-stream_ssl_module --with-stream --with-mail
 
 make 
