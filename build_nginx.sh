@@ -19,7 +19,8 @@ cd zlib-1.2.8
 make
 sudo make install
 
-apt-get install libssl-dev
+apt-get install -y libssl-dev
+
 cd /root
 wget http://nginx.org/download/nginx-1.9.11.tar.gz
 tar -xzvf nginx-1.9.11.tar.gz 
