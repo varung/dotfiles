@@ -63,6 +63,8 @@ cd /usr/local/nginx/
 for i in `LD_VERBOSE=1 LD_TRACE_LOADED_OBJECTS=1 ./nginx -v | grep "=>"| awk '{ print $4}' | sort -u | grep so`; do cp $i lib/; done
 
 chrpath /usr/local/nginx/nginx -r '${ORIGIN}/lib'
+
+cp /root/dotfiles/nginx.conf /usr/local/nginx/
 tar -czvf nginx.tgz /usr/local/nginx
 
 

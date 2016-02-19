@@ -1,0 +1,2 @@
+# to use cjson, you have to put this before the server directive in the nginx.conf
+init_by_lua 'package.cpath=package.cpath..";/usr/local/nginx/lib/?.so"; cjson = require "cjson"';
