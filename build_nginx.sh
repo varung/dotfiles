@@ -15,6 +15,7 @@ case $STAGE in
 
 prereq)
 apt-get install -y libssl-dev curl sudo chrpath gcc g++
+curl -L https://github.com/aktau/github-release/releases/download/v0.6.2/linux-amd64-github-release.tar.bz2 | tar --strip-components=3 -xvjf -;
 ;&
 
 pcre)
@@ -93,12 +94,9 @@ tar -xzvf /root/$NGINX_NAME.tgz -C/
 ;&
 
 release)
-curl -L https://github.com/aktau/github-release/releases/download/v0.6.2/linux-amd64-github-release.tar.bz2 | tar --strip-components=3 -xvjf -;
-GITHUB_TOKEN=407f7ef50a9fc6ee913b3c13829f1bd12e354b03
-VERSION=v1.7
+VERSION=v1.7.1
 ./github-release release -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION
 ./github-release upload -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION -n webterminalproxyd.tgz -f /root/webterminalproxyd.tgz
-
 
 
 ;;
