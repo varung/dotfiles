@@ -5,6 +5,7 @@ expand() {
  curl -L $1 | tar xzvf -; 
 }
 
+NGINX_NAME=webterminalproxyd
 export LUAJIT_LIB=/usr/local/lib/
 export LUAJIT_INC=/usr/local/include/luajit-2.0/
 
@@ -14,7 +15,6 @@ case $STAGE in
 
 prereq)
 apt-get install -y libssl-dev curl sudo chrpath gcc g++
-curl -L https://github.com/c4milo/github-release/releases/download/v1.0.8/github-release_v1.0.8_linux_amd64.tar.gz | tar xzvf -; 
 ;&
 
 pcre)
@@ -57,6 +57,8 @@ CPATH=/usr/local/include/luajit-2.0/ make
 nginx)
 expand http://nginx.org/download/nginx-1.9.7.tar.gz
 cd /root/nginx-1.9.7
+# patch nginx to use custom name
+sed -i "s/nginx:\ /${NGINX_NAME}: /" src/os/unix/ngx_setproctitle.c
 ./configure --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-ld-opt="-Wl,-rpath,SSORIGINS/lib" --with-pcre=../pcre-8.37 --with-zlib=../zlib-1.2.8  --with-http_ssl_module  --with-stream_ssl_module --with-stream --add-module=/root/ngx_devel_kit-0.2.19 --add-module=/root/lua-nginx-module-0.10.0
 
 make  -j 2
@@ -79,27 +81,24 @@ for i in `LD_VERBOSE=1 LD_TRACE_LOADED_OBJECTS=1 ./nginx -v | grep "=>"| awk '{ 
 done
 chrpath /usr/local/nginx/nginx -r '${ORIGIN}/lib'
 cp -t /usr/local/nginx /root/dotfiles/nginx.conf
-tar -czvf /root/nginx.tgz /usr/local/nginx
-rm -rf /usr/local/nginx
+mv /usr/local/nginx/nginx /usr/local/nginx/$NGINX_NAME
+mv /usr/local/nginx /usr/local/$NGINX_NAME
+tar -czvf /root/$NGINX_NAME.tgz /usr/local/$NGINX_NAME
+rm -rf /usr/local/$NGINX_NAME
 ;&
 
 testinstall)
-rm -rf /usr/local/nginx
-tar -xzvf /root/nginx.tgz -C/
+rm -rf /usr/local/$NGINX_NAME
+tar -xzvf /root/$NGINX_NAME.tgz -C/
 ;&
 
 release)
-GITHUB_TOKEN=a9803e7217bd61758ab82381904f777b63a48604
-#github-release varung/dotfiles <tag> <branch> <description> "<files>"
+curl -L https://github.com/aktau/github-release/releases/download/v0.6.2/linux-amd64-github-release.tar.bz2 | tar --strip-components=3 -xvjf -;
+GITHUB_TOKEN=407f7ef50a9fc6ee913b3c13829f1bd12e354b03
+VERSION=v1.7
+./github-release release -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION
+./github-release upload -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION -n webterminalproxyd.tgz -f /root/webterminalproxyd.tgz
 
-NAME=dotfiles
-VERSION=v1.3
-latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`);
-comparison="$latest_tag..HEAD";
-if [ -z "$latest_tag" ]; then comparison=""; fi;
-changelog=$(git log $comparison --oneline --no-merges --reverse);
-./github-release varung/${NAME} ${VERSION} "$(git rev-parse --abbrev-ref HEAD)" "**Changelog**<br/>$changelog" '/root/nginx.tgz';
-git pull
 
 
 ;;
