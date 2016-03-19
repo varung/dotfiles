@@ -1,11 +1,11 @@
-#bash install.sh 
-
 expand() {
  cd /root;
  curl -L $1 | tar xzvf -; 
 }
 
-NGINX_NAME=webterminalproxyd
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+. $DIR/env.sh
+
 export LUAJIT_LIB=/usr/local/lib/
 export LUAJIT_INC=/usr/local/include/luajit-2.0/
 
@@ -14,7 +14,8 @@ STAGE=${1:-prereq}
 case $STAGE in
 
 prereq)
-apt-get install -y libssl-dev curl sudo chrpath gcc g++
+apt-get update
+apt-get install -y libssl-dev curl sudo chrpath gcc g++ strace
 curl -L https://github.com/aktau/github-release/releases/download/v0.6.2/linux-amd64-github-release.tar.bz2 | tar --strip-components=3 -xvjf -;
 ;&
 
@@ -66,14 +67,18 @@ make  -j 2
 ;&
 
 package)
+
+
 # clean anything there from before
 rm -rf /usr/local/nginx
 
 # install stuff
 cd /root/nginx-1.9.7
 make install;
+
 # package the non-chroot version, does not include libc,pthread
 mkdir -p /usr/local/nginx/lib/
+mkdir -p /usr/local/nginx/logs/
 cp -t /usr/local/nginx/lib/ /root/lua-cjson-2.1.0/cjson.so /usr/local/lib/libluajit-5.1.so.2
 cd /usr/local/nginx/
 for i in `LD_VERBOSE=1 LD_TRACE_LOADED_OBJECTS=1 ./nginx -v | grep "=>"| awk '{ print $4}' | sort -u | grep so  | grep -v 'pthread' | grep -v 'libc\.' | grep -v 'ld-linux'`; do 
@@ -83,20 +88,76 @@ done
 chrpath /usr/local/nginx/nginx -r '${ORIGIN}/lib'
 cp -t /usr/local/nginx /root/dotfiles/nginx.conf
 mv /usr/local/nginx/nginx /usr/local/nginx/$NGINX_NAME
-mv /usr/local/nginx /usr/local/$NGINX_NAME
-tar -czvf /root/$NGINX_NAME.tgz /usr/local/$NGINX_NAME
-rm -rf /usr/local/$NGINX_NAME
+
+# rename folder: unnecessary in chroot
+#mv /usr/local/nginx /usr/local/$NGINX_NAME
+#tar -czvf /root/$NGINX_NAME.tgz /usr/local/$NGINX_NAME
+#rm -rf /usr/local/$NGINX_NAME
+;&
+
+chrootify)
+# make chroot folder
+rm -rf $cdir
+mkdir -p $cdir/{bin,usr,lib,usr/lib,dev,sys,tmp,proc,var}
+chmod a+rwx $cdir/tmp
+cp /bin/bash $cdir/bin/bash
+
+# copy minimum files needed in there
+cp -r -t $cdir --parents /usr/local/nginx
+
+# copy every library we use
+for i in `LD_VERBOSE=1 LD_TRACE_LOADED_OBJECTS=1 /usr/local/nginx/$NGINX_NAME | grep "=>"| awk '{ print $4}' | sort -u | grep so`; do 
+	echo "copying in lib $i"
+	cp -t $cdir --parents $i;
+done
+
+# get the files not in /usr/local/nginx
+# nginx_chroot_files is a list of files that were open'ed successfully during a strace
+# includes some extra ones not above
+for i in $(cat ~/dotfiles/nginx_chroot_files); do
+	cp -t $cdir --parents $i
+done 
+# the loader itself
+# cp -t $cdir --parents /lib64/ld-linux-x86-64.so.2
+
+
+cat <<-EOF >> $cdir/mount.sh
+	#!/bin/bash
+	# mount it
+	mount -t proc proc $cdir/proc
+	mount -t sysfs -o rw,noexec,nosuid,nodev none $cdir/sys
+	mount -o bind /dev $cdir/dev
+	mount -o bind /var $cdir/var
+	
+EOF
+
+cat <<-EOF >> $cdir/umount.sh
+	#!/bin/bash
+	umount $cdir/{proc,sys,dev,var}
+EOF
+
+cat <<-EOF >> $cdir/run.sh
+	#!/bin/bash
+	chroot $cdir /usr/local/nginx/$NGINX_NAME
+EOF
+chmod +x $cdir/{mount.sh,umount.sh,run.sh}
+
+# TODO: it may be possible to create a script that mounts, runs, and then umounts on exit, assuming nginx runs in foreground
+
+# TODO: install node and webterminal?
+tar -czvf /root/cloudlabs_bundle.tgz $pdir
+
 ;&
 
 testinstall)
-rm -rf /usr/local/$NGINX_NAME
-tar -xzvf /root/$NGINX_NAME.tgz -C/
-;&
+#rm -rf /usr/local/$NGINX_NAME
+#tar -xzvf /root/$NGINX_NAME.tgz -C/
 
+;&
 release)
 VERSION=v1.7.1
-./github-release release -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION
-./github-release upload -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION -n webterminalproxyd.tgz -f /root/webterminalproxyd.tgz
+/root/github-release release -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION
+/root/github-release upload -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION -n cloudlabs_bundle.tgz -f /root/cloudlabs_bundle.tgz
 
 
 ;;

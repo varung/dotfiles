@@ -1,0 +1,12 @@
+
+
+# run the program with strace
+strace -o files -e trace=open -ff /usr/local/nginx/webterminalproxyd
+
+# kill it after some amount of time
+
+# parse the resulting file
+cat files.* | grep -v 'ENOENT' |  grep open | sed -e's/open("\(.*\)".*/\1/' > dotfiles/nginx_chroot_files
+
+# this is a list of files that were accessed by nginx when it ran, which captures some weird unexpected files that have to be in the chroot
+# filter it manually for things like /proc

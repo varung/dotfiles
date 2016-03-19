@@ -1,0 +1,13 @@
+/etc/group
+/etc/ld.so.cache
+/etc/localtime
+/etc/nsswitch.conf
+/etc/passwd
+/lib/x86_64-linux-gnu/libc.so.6
+/lib/x86_64-linux-gnu/libgcc_s.so.1
+/lib/x86_64-linux-gnu/libnsl.so.1
+/lib/x86_64-linux-gnu/libnss_compat.so.2
+/lib/x86_64-linux-gnu/libnss_files.so.2
+/lib/x86_64-linux-gnu/libnss_nis.so.2
+/lib/x86_64-linux-gnu/libpthread.so.0
+/usr/lib/ssl/openssl.cnf
