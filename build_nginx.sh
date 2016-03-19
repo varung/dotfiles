@@ -155,7 +155,7 @@ testinstall)
 
 ;&
 release)
-VERSION=v1.7.1
+VERSION=v1.8.0
 /root/github-release release -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION
 /root/github-release upload -s $GITHUB_TOKEN -u varung -r dotfiles -t $VERSION -n cloudlabs_bundle.tgz -f /root/cloudlabs_bundle.tgz
 
