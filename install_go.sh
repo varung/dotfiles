@@ -5,3 +5,4 @@ tar -C /usr/local -xzf $(basename $gotgz)
 mkdir -p $HOME/go
 echo "export GOPATH=$HOME/go" >> ~/.bashrc
 echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> ~/.bashrc
+vim +GoInstallBinaries +qall
