@@ -126,23 +126,43 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 Bundle 'solarnz/thrift.vim'
 Plugin 'fatih/vim-go'
-" Plugin 'Shougo/neocomplete.vim'
+Plugin 'Shougo/neocomplete.vim'
+Plugin 'justmao945/vim-clang'
 Plugin 'majutsushi/tagbar'
 Plugin 'Shougo/vimproc.vim'
 Plugin 'Shougo/vimshell.vim'
 Plugin 'vim-utils/vim-man'
 Plugin 'mileszs/ack.vim'
-Plugin 'YankRing.vim'
-
+Plugin 'easymotion/vim-easymotion'
 
 call vundle#end()            " required
 filetype plugin indent on    " required
 
-set nobackup
-set nowritebackup
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
 
+" Jump to anywhere you want with minimal keystrokes, with just one key binding.
+" `s{char}{label}`
+nmap s <Plug>(easymotion-overwin-f)
+
+" or
+" `s{char}{char}{label}`
+" Need one more keystroke, but on average, it may be more comfortable.
+" nmap s <Plug>(easymotion-overwin-f2)
+" Turn on case insensitive feature
+let g:EasyMotion_smartcase = 1
+" JK motions: Line motions
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
+
+set backupdir=$HOME/.backup
+set backup
+set writebackup
+set directory=$HOME/.backup
+
+nmap <C-b> :!ssh root@192.168.99.100 "cd /root/fuse-2.9.2/repfs; make;"<CR>
 colorscheme elflord
 
+execute pathogen#infect()
 syntax on
 filetype plugin indent on
 colorscheme zellner
@@ -195,8 +215,6 @@ set laststatus=2
 set undofile
 let mapleader = ","
 
-nnoremap / /\v
-vnoremap / /\v
 set ignorecase
 set smartcase
 set gdefault
