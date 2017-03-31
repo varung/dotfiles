@@ -25,8 +25,6 @@ let g:miniBufExplMapCTabSwitchBufs = 1
 let g:miniBufExplModSelTarget = 1 
 
 " make tab sizes smaller (4 instead of 8) and all spaces...
-set sw=2
-set ts=2
 set ic
 set expandtab
 set smarttab
@@ -43,7 +41,6 @@ set nocompatible
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
-set ts=4
 set autoindent		" always set autoindenting on
 
 set history=50		" keep 50 lines of command line history
@@ -135,6 +132,7 @@ Plugin 'easymotion/vim-easymotion'
 Plugin 'fatih/molokai'
 Plugin 'vitalk/vim-simple-todo'
 Plugin 'tpope/vim-repeat'
+Plugin 'fholgado/minibufexpl.vim'
 
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -190,7 +188,6 @@ function HighlightNearCursor()
 endfunction
 nnoremap <C-K> :call HighlightNearCursor()<CR>
 
-let g:go_fmt_command = "goimports"
 map <C-n> :lne<CR>
 map <C-m> :lp<CR>
 
@@ -245,10 +242,7 @@ nnoremap <C-l> <C-w>l
 nnoremap <silent> <F3> :YRShow<cr>
 inoremap <silent> <F3> <ESC>:YRShow<cr>
 
-colorscheme torte
-
 command Todo noautocmd vimgrep /TODO\|FIXME/j ** | cw
-
 
 " Put plugins and dictionaries in this dir (also on Windows)
 let vimDir = '$HOME/.vim'
@@ -263,3 +257,46 @@ if has('persistent_undo')
     let &undodir = myUndoDir
     set undofile
 endif
+
+" go settings
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_types = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+let g:go_fmt_command = "goimports"
+let g:go_fmt_fail_silently = 1
+
+let g:tagbar_type_go = {  
+    \ 'ctagstype' : 'go',
+    \ 'kinds'     : [
+        \ 'p:package',
+        \ 'i:imports:1',
+        \ 'c:constants',
+        \ 'v:variables',
+        \ 't:types',
+        \ 'n:interfaces',
+        \ 'w:fields',
+        \ 'e:embedded',
+        \ 'm:methods',
+        \ 'r:constructor',
+        \ 'f:functions'
+    \ ],
+    \ 'sro' : '.',
+    \ 'kind2scope' : {
+        \ 't' : 'ctype',
+        \ 'n' : 'ntype'
+    \ },
+    \ 'scope2kind' : {
+        \ 'ctype' : 't',
+        \ 'ntype' : 'n'
+    \ },
+    \ 'ctagsbin'  : 'gotags',
+    \ 'ctagsargs' : '-sort -silent'
+\}
+
+
+
+nmap <F8> :TagbarToggle<CR>
+colorscheme molokai
